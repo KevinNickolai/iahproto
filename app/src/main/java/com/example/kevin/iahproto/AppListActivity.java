@@ -1,12 +1,18 @@
 package com.example.kevin.iahproto;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +22,9 @@ public class AppListActivity extends ListActivity {
 
     PackageManager m_pm;
     List<ApplicationInfo> m_blockedApps;
-    ListView m_appsList;
+    List<ApplicationInfo> m_allApps;
+    List<String> m_allAppNames;
+    ListView m_appsListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,20 +34,40 @@ public class AppListActivity extends ListActivity {
         m_pm = getPackageManager();
 
         //the list of installed apps we're going to check for blocking
-        List<ApplicationInfo> allApps = m_pm.getInstalledApplications(0);
+        m_allApps = m_pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        m_allAppNames = new ArrayList<String>();
+        m_blockedApps = new ArrayList<ApplicationInfo>();
+
+        for (int i = 0; i < m_allApps.size(); ++i)
+        {
+            m_allAppNames.add((m_allApps.get(i)).packageName);
+        }
+
+
 
         //get our ListView
-        m_appsList = findViewById(R.id.listViewAppList);
+        m_appsListView = getListView();
 
-        ArrayAdapter<ApplicationInfo> adapter = new ArrayAdapter<ApplicationInfo>(this, android.R.layout.simple_list_item_1,allApps);
-        m_appsList.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,m_allAppNames);
+        m_appsListView.setAdapter(adapter);
     }
 
-    public void onOkPressed(View view)
-    {
-        //iterate through selection list of apps
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Do something when a list item is clicked
 
-        //m_blockedApps.add(app);
+        ApplicationInfo appInfo = m_allApps.get(m_allAppNames.indexOf(m_appsListView.getItemAtPosition(position)));
+        //if the blocked apps contains the item we've clicked on, deselect the item clicked
+
+        if(m_blockedApps.contains(appInfo))
+        {
+            m_blockedApps.remove(appInfo);
+        }
+        else //blocked apps doesn't contain it, add and mark it.
+        {
+            m_blockedApps.add(appInfo);
+        }
     }
 
     public void onStartAssignment(View view)
