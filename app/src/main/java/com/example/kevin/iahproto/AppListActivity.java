@@ -44,8 +44,6 @@ public class AppListActivity extends ListActivity {
             m_allAppNames.add((m_allApps.get(i)).packageName);
         }
 
-
-
         //get our ListView
         m_appsListView = getListView();
 
@@ -57,12 +55,15 @@ public class AppListActivity extends ListActivity {
     public void onListItemClick(ListView l, View v, int position, long id) {
         // Do something when a list item is clicked
 
+        //based on the position of the application name in the allAppNames, get the application info of the app associated with that name.
         ApplicationInfo appInfo = m_allApps.get(m_allAppNames.indexOf(m_appsListView.getItemAtPosition(position)));
-        //if the blocked apps contains the item we've clicked on, deselect the item clicked
 
+        //if the blocked app is already blocked, remove it
         if(m_blockedApps.contains(appInfo))
         {
             m_blockedApps.remove(appInfo);
+            v = new TextView(this);
+            v.setBackgroundColor(Color.RED);
         }
         else //blocked apps doesn't contain it, add and mark it.
         {
@@ -86,15 +87,22 @@ public class AppListActivity extends ListActivity {
                 e.printStackTrace();
             }
         }
+
+        Intent intent = new Intent(this,MainActivity.class);
     }
 
     public void onEndAssignment(View view)
     {
-        for(int i = 0; i < m_blockedApps.size(); ++i)
+        try {
+            for (int i = 0; i < m_blockedApps.size(); ++i) {
+                m_pm.setApplicationEnabledSetting(m_blockedApps.get(i).packageName,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP);
+            }
+        }
+        catch(Exception e)
         {
-            m_pm.setApplicationEnabledSetting(m_blockedApps.get(i).packageName,
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    PackageManager.DONT_KILL_APP);
+            e.printStackTrace();
         }
     }
 }
